@@ -1,0 +1,37 @@
+{
+  "accountId": "ABC",
+  "totalAssets": 100000,
+  "vestedPercentage": 100,
+  "securities": [
+    {
+      "symbol": "IBM",
+      "targetPercentage": 20,
+      "currentPercentage": 10,
+      "unitPrice": 150
+    },
+    {
+      "symbol": "MSFT",
+      "targetPercentage": 20,
+      "currentPercentage": 20,
+      "unitPrice": 90
+    },
+    {
+      "symbol": "ORCL",
+      "targetPercentage": 20,
+      "currentPercentage": 30,
+      "unitPrice": 220
+    },
+    {
+      "symbol": "AAPL",
+      "targetPercentage": 20,
+      "currentPercentage": 20,
+      "unitPrice": 450
+    },
+    {
+      "symbol": "HD",
+      "targetPercentage": 20,
+      "currentPercentage": 20,
+      "unitPrice": 70
+    }
+  ]
+}

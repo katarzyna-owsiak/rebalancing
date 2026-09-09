@@ -1,0 +1,30 @@
+{
+  "accountId": "ABC",
+  "rebalance": [
+    {
+      "symbol": "IBM",
+      "action": "BUY",
+      "shares": 66.6667
+    },
+    {
+      "symbol": "MSFT",
+      "action": "NONE",
+      "shares": 0
+    },
+    {
+      "symbol": "ORCL",
+      "action": "SELL",
+      "shares": 45.4545
+    },
+    {
+      "symbol": "AAPL",
+      "action": "NONE",
+      "shares": 0
+    },
+    {
+      "symbol": "HD",
+      "action": "NONE",
+      "shares": 0
+    }
+  ]
+}
