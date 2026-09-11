@@ -1,4 +1,4 @@
-package config;
+package org.example.rebalancing.config;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 

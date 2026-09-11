@@ -1,14 +1,13 @@
-package tests;
+package org.example.rebalancing.tests;
 
-import config.WireMockConfig;
-import mock.RebalancingApiMock;
+import org.example.rebalancing.config.WireMockConfig;
+import org.example.rebalancing.mock.RebalancingApiMock;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.nio.charset.StandardCharsets;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.closeTo;
@@ -40,9 +39,7 @@ class RebalancingApiTest {
     @Test
     void shouldCorrectlyRebalanceAccountABC() {
 
-        String requestBody = loadRequest(
-                "src/test/resources/account-abc.json"
-        );
+        String requestBody = loadRequestFromClasspath("account-abc.json");
 
         given()
                 .baseUri(wireMockConfig.getBaseUrl())
@@ -72,7 +69,7 @@ class RebalancingApiTest {
 
                 .body(
                         "rebalance.find { it.symbol == 'IBM' }.shares",
-                        equalTo(66.6667f)
+                        closeTo(66.6667d, 0.0001d)
                 )
 
                 .body(
@@ -92,7 +89,7 @@ class RebalancingApiTest {
 
                 .body(
                         "rebalance.find { it.symbol == 'ORCL' }.shares",
-                        equalTo(45.4545f)
+                        closeTo(45.4545d, 0.0001d)
                 )
 
                 .body(
@@ -116,15 +113,25 @@ class RebalancingApiTest {
                 );
     }
 
-    private static String loadRequest(String filePath) {
+    private static String loadRequestFromClasspath(String filename) {
 
         try {
-            return Files.readString(Path.of(filePath));
+            var resource = RebalancingApiTest.class
+                    .getClassLoader()
+                    .getResourceAsStream(filename);
+
+            if (resource == null) {
+                throw new IllegalArgumentException(
+                        "Resource not found on classpath: " + filename
+                );
+            }
+
+            return new String(resource.readAllBytes(), StandardCharsets.UTF_8);
 
         } catch (IOException e) {
 
             throw new RuntimeException(
-                    "Could not read request file: " + filePath,
+                    "Could not read request file: " + filename,
                     e
             );
         }

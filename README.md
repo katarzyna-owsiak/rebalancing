@@ -1,10 +1,6 @@
 # Rebalancing API – QA Automation Tests
 
-Independent API automation test suite for the Rebalancing API.
 
-The project demonstrates how an API could be tested using **REST Assured**, **JUnit 5** and **WireMock**, without access to the production application's source code.
-
----
 
 ## 📌 Project Overview
 
@@ -205,29 +201,3 @@ For the purpose of this test scenario, the expected number of shares is derived 
     * Shares:
       10,000 / 220 = 45.4545
     * **Therefore:** `ORCL` → `SELL` → **45.4545 shares**
-
----
-
-# 🗂️ Test Data Strategy
-
-Request and mock response data are stored separately from Java code.
-
-* **Request:** `src/test/resources/requests/account-abc.json`  
-  Contains the data sent to `POST /rebalance`.
-* **Mock response:** `src/test/resources/mocks/account-abc-response.json`  
-  Contains the response returned by WireMock.
-
-This separation keeps the test code focused on test behaviour and assertions, rather than large JSON payloads.
-
----
-
-# 🛠️ Technology Stack
-
-| Technology | Purpose |
-| :--- | :--- |
-| **Java 17** | Programming language |
-| **JUnit 5** | Test framework |
-| **REST Assured** | HTTP/API testing |
-| **WireMock** | API mocking |
-| **Maven** | Build and dependency management |
-

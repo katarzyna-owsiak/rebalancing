@@ -1,10 +1,9 @@
-package mock;
+package org.example.rebalancing.mock;
 
-import config.WireMockConfig;
+import org.example.rebalancing.config.WireMockConfig;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.nio.charset.StandardCharsets;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
@@ -20,9 +19,7 @@ public class RebalancingApiMock {
 
         configureFor("localhost", 8080);
 
-        String responseBody = loadResponse(
-                "src/test/resources/account-abc-response.json"
-        );
+        String responseBody = loadResponseFromClasspath("account-abc-response.json");
 
         stubFor(
                 post(urlEqualTo("/rebalance"))
@@ -38,15 +35,23 @@ public class RebalancingApiMock {
         );
     }
 
-    private String loadResponse(String filePath) {
+    private String loadResponseFromClasspath(String filename) {
 
         try {
-            return Files.readString(Path.of(filePath));
+            var resource = getClass().getClassLoader().getResourceAsStream(filename);
+
+            if (resource == null) {
+                throw new IllegalArgumentException(
+                        "Resource not found on classpath: " + filename
+                );
+            }
+
+            return new String(resource.readAllBytes(), StandardCharsets.UTF_8);
 
         } catch (IOException e) {
 
             throw new RuntimeException(
-                    "Could not read mock response file: " + filePath,
+                    "Could not read mock response file: " + filename,
                     e
             );
         }
