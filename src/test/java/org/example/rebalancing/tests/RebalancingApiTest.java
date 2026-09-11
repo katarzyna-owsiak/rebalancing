@@ -1,139 +1,48 @@
 package org.example.rebalancing.tests;
 
-import org.example.rebalancing.config.WireMockConfig;
-import org.example.rebalancing.mock.RebalancingApiMock;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-
 import static io.restassured.RestAssured.given;
+import static org.example.rebalancing.config.ApiConstants.*;
 import static org.hamcrest.Matchers.closeTo;
 import static org.hamcrest.Matchers.equalTo;
 
-class RebalancingApiTest {
-
-    private static WireMockConfig wireMockConfig;
-
-    @BeforeAll
-    static void setUp() {
-
-        wireMockConfig = new WireMockConfig();
-
-        wireMockConfig.start();
-
-        RebalancingApiMock apiMock =
-                new RebalancingApiMock(wireMockConfig);
-
-        apiMock.stubSuccessfulRebalance();
-    }
-
-    @AfterAll
-    static void tearDown() {
-
-        wireMockConfig.stop();
-    }
+class RebalancingApiTest extends ApiTestBase {
 
     @Test
     void shouldCorrectlyRebalanceAccountABC() {
+        apiMock.stubSuccessfulRebalance();
 
-        String requestBody = loadRequestFromClasspath("account-abc.json");
+        String requestBody = loadResourceFromClasspath(ACCOUNT_ABC_REQUEST);
 
         given()
-                .baseUri(wireMockConfig.getBaseUrl())
-                .contentType("application/json")
+                .baseUri(getBaseUrl())
+                .contentType(CONTENT_TYPE_JSON)
                 .body(requestBody)
 
                 .when()
-                .post("/rebalance")
+                .post(REBALANCE_ENDPOINT)
 
                 .then()
-                .statusCode(200)
+                .statusCode(HTTP_OK)
 
-                .body(
-                        "accountId",
-                        equalTo("ABC")
-                )
+                .body(JSON_PATH_ACCOUNT_ID, equalTo(ACCOUNT_ID_ABC))
 
-                .body(
-                        "rebalance.size()",
-                        equalTo(5)
-                )
+                .body(JSON_PATH_REBALANCE_SIZE, equalTo(EXPECTED_SECURITIES_COUNT))
 
-                .body(
-                        "rebalance.find { it.symbol == 'IBM' }.action",
-                        equalTo("BUY")
-                )
+                .body(String.format(JSON_PATH_REBALANCE_ACTIONS, SECURITY_IBM), equalTo(ACTION_BUY))
+                .body(String.format(JSON_PATH_REBALANCE_SHARES, SECURITY_IBM), closeTo(IBM_EXPECTED_SHARES, SHARES_TOLERANCE))
 
-                .body(
-                        "rebalance.find { it.symbol == 'IBM' }.shares",
-                        closeTo(66.6667d, 0.0001d)
-                )
+                .body(String.format(JSON_PATH_REBALANCE_ACTIONS, SECURITY_MSFT), equalTo(ACTION_NONE))
+                .body(String.format(JSON_PATH_REBALANCE_SHARES, SECURITY_MSFT), equalTo(NO_ACTION_SHARES))
 
-                .body(
-                        "rebalance.find { it.symbol == 'MSFT' }.action",
-                        equalTo("NONE")
-                )
+                .body(String.format(JSON_PATH_REBALANCE_ACTIONS, SECURITY_ORCL), equalTo(ACTION_SELL))
+                .body(String.format(JSON_PATH_REBALANCE_SHARES, SECURITY_ORCL), closeTo(ORCL_EXPECTED_SHARES, SHARES_TOLERANCE))
 
-                .body(
-                        "rebalance.find { it.symbol == 'MSFT' }.shares",
-                        equalTo(0)
-                )
+                .body(String.format(JSON_PATH_REBALANCE_ACTIONS, SECURITY_AAPL), equalTo(ACTION_NONE))
+                .body(String.format(JSON_PATH_REBALANCE_SHARES, SECURITY_AAPL), equalTo(NO_ACTION_SHARES))
 
-                .body(
-                        "rebalance.find { it.symbol == 'ORCL' }.action",
-                        equalTo("SELL")
-                )
-
-                .body(
-                        "rebalance.find { it.symbol == 'ORCL' }.shares",
-                        closeTo(45.4545d, 0.0001d)
-                )
-
-                .body(
-                        "rebalance.find { it.symbol == 'AAPL' }.action",
-                        equalTo("NONE")
-                )
-
-                .body(
-                        "rebalance.find { it.symbol == 'AAPL' }.shares",
-                        equalTo(0)
-                )
-
-                .body(
-                        "rebalance.find { it.symbol == 'HD' }.action",
-                        equalTo("NONE")
-                )
-
-                .body(
-                        "rebalance.find { it.symbol == 'HD' }.shares",
-                        equalTo(0)
-                );
-    }
-
-    private static String loadRequestFromClasspath(String filename) {
-
-        try {
-            var resource = RebalancingApiTest.class
-                    .getClassLoader()
-                    .getResourceAsStream(filename);
-
-            if (resource == null) {
-                throw new IllegalArgumentException(
-                        "Resource not found on classpath: " + filename
-                );
-            }
-
-            return new String(resource.readAllBytes(), StandardCharsets.UTF_8);
-
-        } catch (IOException e) {
-
-            throw new RuntimeException(
-                    "Could not read request file: " + filename,
-                    e
-            );
-        }
+                .body(String.format(JSON_PATH_REBALANCE_ACTIONS, SECURITY_HD), equalTo(ACTION_NONE))
+                .body(String.format(JSON_PATH_REBALANCE_SHARES, SECURITY_HD), equalTo(NO_ACTION_SHARES));
     }
 }

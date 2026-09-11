@@ -1,5 +1,6 @@
 package org.example.rebalancing.mock;
 
+import org.example.rebalancing.config.ApiConstants;
 import org.example.rebalancing.config.WireMockConfig;
 
 import java.io.IOException;
@@ -16,27 +17,22 @@ public class RebalancingApiMock {
     }
 
     public void stubSuccessfulRebalance() {
+        configureFor(ApiConstants.HOST, ApiConstants.WIREMOCK_PORT);
 
-        configureFor("localhost", 8080);
-
-        String responseBody = loadResponseFromClasspath("account-abc-response.json");
+        String responseBody = loadResponseFromClasspath(ApiConstants.ACCOUNT_ABC_RESPONSE);
 
         stubFor(
-                post(urlEqualTo("/rebalance"))
+                post(urlEqualTo(ApiConstants.REBALANCE_ENDPOINT))
                         .willReturn(
                                 aResponse()
-                                        .withStatus(200)
-                                        .withHeader(
-                                                "Content-Type",
-                                                "application/json"
-                                        )
+                                        .withStatus(ApiConstants.HTTP_OK)
+                                        .withHeader("Content-Type", ApiConstants.CONTENT_TYPE_JSON)
                                         .withBody(responseBody)
                         )
         );
     }
 
     private String loadResponseFromClasspath(String filename) {
-
         try {
             var resource = getClass().getClassLoader().getResourceAsStream(filename);
 
@@ -49,7 +45,6 @@ public class RebalancingApiMock {
             return new String(resource.readAllBytes(), StandardCharsets.UTF_8);
 
         } catch (IOException e) {
-
             throw new RuntimeException(
                     "Could not read mock response file: " + filename,
                     e
