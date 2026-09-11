@@ -1,6 +1,10 @@
 # Rebalancing API – QA Automation Tests
 
+Independent API automation test suite for the Rebalancing API.
 
+The project demonstrates how an API could be tested using **REST Assured**, **JUnit 5** and **WireMock**, without access to the production application's source code.
+
+---
 
 ## 📌 Project Overview
 
@@ -38,17 +42,47 @@ mvn test
 
 ---
 
-# Responsibilities
+# 📂 Project Structure
 
-| Component                     | Responsibility |
-|:------------------------------| :--- |
-| **WireMockConfig**            | Starts and stops the WireMock server |
-| **RebalancingApiMock**        | Defines the mocked API behaviour |
-| **account-abc.json**          | Contains request test data |
-| **account-abc-response.json** | Contains the mocked API response |
-| **RebalancingApiTest**        | Sends requests and performs assertions |
-| **pom.xml**                   | Defines project dependencies and build configuration |
-| **manual-test-cases.md**      | Manual test scenarios and exploratory test coverage |
+## Architecture
+
+The project follows a clean, layered architecture:
+
+```
+src/test/java/org/example/rebalancing/
+├── config/
+│   ├── ApiConstants.java          - Centralized configuration & test data constants
+│   └── WireMockConfig.java        - WireMock server lifecycle management
+├── mock/
+│   └── RebalancingApiMock.java    - API stub definitions
+└── tests/
+    ├── ApiTestBase.java           - Base class with common setup/teardown
+    └── RebalancingApiTest.java    - Business logic test cases
+
+src/test/resources/
+├── account-abc.json               - Request payload (account with 5 securities)
+└── account-abc-response.json      - Mocked API response
+```
+
+## Component Responsibilities
+
+| Component | Responsibility |
+|:---|:---|
+| **ApiConstants** | Centralized configuration: endpoints, timeouts, test data, expected values |
+| **WireMockConfig** | Manages WireMock server lifecycle (start/stop) |
+| **RebalancingApiMock** | Defines mock API behavior and response stubs |
+| **ApiTestBase** | Abstract base class for all tests; provides common setup, teardown, and utility methods |
+| **RebalancingApiTest** | Implements business logic tests; validates BUY, SELL, NONE actions and share calculations |
+| **account-abc.json** | Request test data: account with 5 securities (IBM, MSFT, ORCL, AAPL, HD) |
+| **account-abc-response.json** | Mock response: expected rebalancing instructions from the API |
+
+## Test Approach
+
+- **Business logic focus**: Validates the core rebalancing algorithm (BUY/SELL/NONE actions)
+- **Mock-based**: Uses WireMock to simulate API responses without external dependencies
+- **Happy path testing**: Tests valid scenarios; error handling is unit test responsibility
+- **Independent**: Does not depend on production code or live APIs
+- **Maintainable**: Separates test data from test logic; uses constants for configuration
 
 ---
 
@@ -201,3 +235,28 @@ For the purpose of this test scenario, the expected number of shares is derived 
     * Shares:
       10,000 / 220 = 45.4545
     * **Therefore:** `ORCL` → `SELL` → **45.4545 shares**
+
+---
+
+# 🗂️ Test Data Strategy
+
+Request and mock response data are stored separately from Java code.
+
+* **Request:** `src/test/resources/account-abc.json`  
+  Contains the data sent to `POST /rebalance`.
+* **Mock response:** `src/test/resources/account-abc-response.json`  
+  Contains the response returned by WireMock.
+
+This separation keeps the test code focused on test behavior and assertions, rather than large JSON payloads.
+
+---
+
+# 🛠️ Technology Stack
+
+| Technology | Purpose | Version |
+| :--- | :--- | :--- |
+| **Java** | Programming language | 22 |
+| **JUnit 5** | Test framework | 5.10.0 |
+| **REST Assured** | HTTP/API testing | 6.0.1 |
+| **WireMock** | API mocking | 3.13.2 |
+| **Maven** | Build and dependency management | 3.9+ |
